@@ -26,7 +26,7 @@ class SudokuPuzzle():
         return ((0<x<=3 or 3<x<=7) and (0<y<=3 or 3<y<=7))
     #forward checking algorithmn
     def forwardCheck(self, x, y, coord_value):
-        if coord == 0:
+        if self.coordinateValue[x] == 0:
             return
         else: #elif:
             #remove domains for row
