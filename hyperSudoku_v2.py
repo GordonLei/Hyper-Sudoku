@@ -7,7 +7,6 @@ class SudokuPuzzle():
         self.coordinateDomains = {}
         self.input_file = ""
         self.output_file = ""
-        #self.solvable = True
     #create the puzzle and give it the correct input and output files
     def create_puzzle(self, inputObj, outputObj):
         input_lines = inputObj.readlines()
@@ -24,32 +23,29 @@ class SudokuPuzzle():
                     self.coordinateDomains[str(i) + str(j)] = [1,2,3,4,5,6,7,8,9]
         self.input_file = inputObj
         self.output_file = outputObj
-        #self.solvable = True 
 
     def print_solution(self):
-        #if(self.solvable):
-            for row in self.coordinateValue:
-                line = " ".join(str(coord) for coord in row)
-                print(line)
-                self.output_file.write(line + "\n")
-            print("\n")
-        #else:
-
+        for row in self.coordinateValue:
+            line = " ".join(str(coord) for coord in row)
+            print(line)
+            self.output_file.write(line + "\n")
+        print("\n")
         
     #check if this is in the overlapping regions
     def checkInOverlappingBlock(self,x,y):
-        return ((0<x<4 or 4<x<8) and (0<y<4 or 4<y<8))
+            return ((0<x<4 or 4<x<8) and (0<y<4 or 4<y<8))
 
     #forward checking algorithm
     def forwardCheck(self, x, y, coord_value):
+
         #remove domains for row
         for i in range(9):
             temp_arr = self.coordinateDomains[str(x) + str(i)]
             if(int(coord_value) in temp_arr):
                 temp_arr.remove(int(coord_value))
             if(len(temp_arr) == 0 and self.coordinateValue[x][i] == 0):
-                #print("ROW ABORTED UNASSIGNED VALUE HAS EMPTY DOMAIN")
-                print("row")
+                return False
+            if(self.coordinateValue[x][i] == self.coordinateValue[x][y] and i != y):
                 return False
             self.coordinateDomains[str(x) + str(i)] = temp_arr
         
@@ -59,8 +55,8 @@ class SudokuPuzzle():
             if(int(coord_value) in temp_arr):
                 temp_arr.remove(coord_value)
             if(len(temp_arr) == 0 and self.coordinateValue[i][y] == 0):
-                #print("COL ABORTED UNASSIGNED VALUE HAS EMPTY DOMAIN")
-                print("col")
+                return False
+            if(self.coordinateValue[i][y] == self.coordinateValue[x][y] and i != x):
                 return False
             self.coordinateDomains[str(i) + str(y)] = temp_arr
         
@@ -77,6 +73,8 @@ class SudokuPuzzle():
                     temp_arr.remove(coord_value)
                 if(len(temp_arr) == 0 and self.coordinateValue[i][j] == 0):
                     return False
+                if(self.coordinateValue[i][j] == self.coordinateValue[x][y] and i != x):
+                   return False
                 self.coordinateDomains[str(i) + str(j)] = temp_arr
         
         #remove domain in overlapping block
@@ -101,6 +99,8 @@ class SudokuPuzzle():
                         temp_arr.remove(coord_value)
                     if(len(temp_arr) == 0 and self.coordinateValue[i][j] == 0):
                         return False
+                    if(self.coordinateValue[i][j] == self.coordinateValue[x][y] and i != x):
+                        return False
                     self.coordinateDomains[str(i) + str(j)] = temp_arr
         return True
 
@@ -116,22 +116,10 @@ class SudokuPuzzle():
                     self.coordinateDomains[coord[0]+coord[1]] = []
                     for row in self.coordinateValue:
                         line = " ".join(str(coord) for coord in row)
-                    
-                    
-                    if (not self.forwardCheck(int(coord[0]), int(coord[1]), i)):
-                        if(self.coordinateValue[int(coord[0])][int(coord[1])] != 0):
-                            #print((int(coord[0]), int(coord[1])) )
-                            #print("start CALLED IN BACKWARD CHECK")
-                            #print("end CALLED IN BACKWARD CHECK\n")
-                            print("CALLED IN BACKWARD CHECK\n")
-                            self.coordinateValue[int(coord[0])][int(coord[1])] = 0
-                            self.coordinateDomains = temp
-                            continue
-                        else:
-                            print("ERROR")
-                            return False
-                    
-                      
+                    if not self.forwardCheck(int(coord[0]), int(coord[1]), i):
+                        self.coordinateValue[int(coord[0])][int(coord[1])] = 0
+                        self.coordinateDomains = temp
+                        continue
                     if self.backwardCheck():
                         return True
                     self.coordinateValue[int(coord[0])][int(coord[1])] = 0
@@ -212,11 +200,11 @@ class SudokuPuzzle():
     def solve_puzzle(self):
         for i in range(9):
             for j in range(9):
-                if self.coordinateValue[i][j] != 0:
+                if self.coordinateValue[i][j] != 0:      
                     if not (self.forwardCheck(i,j, self.coordinateValue[i][j])):
-                        print("start CALLED IN SOLVE PUZZLE")
-                        print("end CALLED IN SOLVE PUZZLE\n")
                         self.output_file.write("The puzzle is unsolvable!" + "\n")
+                        quit()
+                        
         self.backwardCheck()
         self.print_solution()
 
